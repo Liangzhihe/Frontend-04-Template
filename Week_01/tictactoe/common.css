@@ -1,0 +1,29 @@
+#wrap {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 50px;
+  width: 300px;
+  height: 300px;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100px;
+  height: 100px;
+  border-left: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  font-size: 80px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.cell:nth-child(-n+3) {
+  border-top: 1px solid #eee;
+}
+
+.cell:nth-child(3n) {
+  border-right: 1px solid #eee;
+}
