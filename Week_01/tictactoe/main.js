@@ -1,6 +1,6 @@
 const pattern = [
-  [0, 0, 0],
-  [0, 0, 0],
+  [0, 0, 2],
+  [0, 1, 0],
   [0, 0, 0],
 ]
 
@@ -31,10 +31,11 @@ function handleClick(x, y) {
     alert(`${color === 1 ? 'O': 'X'} is win`)
   }
   color = 3 - color
-  if (willWin(pattern, color)) console.log(`${color === 1 ? 'O': 'X'} will win`)
+  if (canWin(pattern, color)) console.log(`${color === 1 ? 'O': 'X'} can win`)
   show()
 }
 
+// note 此处，可以使用另外的判定方法（类似五子棋的那种）
 function check(pattern, color) {
   for (let i = 0; i < 3; i += 1) {
     let result = true
@@ -74,16 +75,48 @@ function copy(data) {
   return JSON.parse(JSON.stringify(data))
 }
 
-function willWin(pattern, color) {
+function canWin(pattern, color) {
   for (let i = 0; i < 3; i += 1) {
     for (let j = 0; j < 3; j += 1) {
       if (pattern[i][j] !== 0) continue
       const temp = copy(pattern)
       temp[i][j] = color
-      if (check(temp, color)) return true
+      if (check(temp, color)) return [j, i]
     }
   }
-  return false
+  return null
+}
+
+// 最优策略
+function bestChoice(pattern, color) {
+  let p
+  if (p = canWin(pattern, color)) {
+    return {
+      point: p,
+      result: 1
+    }
+  }
+
+  let result = -2
+  let point = null
+  for (let i = 0; i < 3; i += 1) {
+    for (let j = 0; j < 3; j += 1) {
+      if (pattern[i][j]) continue
+      let temp = copy(pattern)
+      temp[i][j] = color
+      let r = bestChoice(temp, 3 - color).result
+      if ( -r > result) {
+        result = -r
+        point = [j, i]
+      }
+    }
+  }
+
+  return {
+    point,
+    result: point ? result : 0
+  }
 }
 
 show()
+console.log(bestChoice(pattern, color))
