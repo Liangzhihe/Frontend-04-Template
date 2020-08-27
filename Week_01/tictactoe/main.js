@@ -1,6 +1,6 @@
 const pattern = [
-  [0, 0, 2],
-  [0, 1, 0],
+  [0, 0, 0],
+  [0, 0, 0],
   [0, 0, 0],
 ]
 
@@ -17,14 +17,13 @@ function show() {
       cell.classList.add('cell')
       const temp = pattern[i][j] === 1 ? 'O' : pattern[i][j] === 2 ? 'X' : ''
       cell.innerText = temp
-      cell.addEventListener('click', () => handleClick(j, i))
+      cell.addEventListener('click', () => userMove(j, i))
       wrap.appendChild(cell)
     }
   }
 }
 
-
-function handleClick(x, y) {
+function userMove(x, y) {
   if (pattern[y][x] !== 0) return
   pattern[y][x] = color
   if (check(pattern, color)) {
@@ -32,6 +31,20 @@ function handleClick(x, y) {
   }
   color = 3 - color
   if (canWin(pattern, color)) console.log(`${color === 1 ? 'O': 'X'} can win`)
+  console.log(bestChoice(pattern, color))
+  show()
+  computerMove()
+}
+
+function computerMove() {
+  const choice = bestChoice(pattern, color)
+  if (choice.point) {
+    pattern[choice.point[1]][choice.point[0]] = color
+  }
+  if (check(pattern, color)) {
+    alert(`${color === 1 ? 'O': 'X'} is win`)
+  }
+  color = 3 - color
   show()
 }
 
@@ -119,4 +132,3 @@ function bestChoice(pattern, color) {
 }
 
 show()
-console.log(bestChoice(pattern, color))
