@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    #wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      margin: 100px;
+      width: 600px;
+      height: 200px;
+    }
+
+    #wrap div {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: #ccc;
+    }
+
+    #wrap .green.light {
+      background: green;
+    }
+
+    #wrap .yellow.light {
+      background: yellow;
+    }
+
+    #wrap .red.light {
+      background: red;
+    }
+  </style>
+  <title>async demo</title>
+</head>
+<body>
+  <div id="wrap">
+    <div class="green"></div>
+    <div class="yellow"></div>
+    <div class="red"></div>
+  </div>
+</body>
+
+<script>
+  // 亮灯
+  // color：颜色
+  function light(color) {
+    const list = document.querySelectorAll('#wrap div')
+    list.forEach(it => it.classList.remove('light'))
+    const item = document.querySelector(`.${color}`)
+    item.classList.add('light')
+  }
+
+
+  function wait(t) {
+    return new Promise((resolve, reject) => {
+      setTimeout(resolve, t)
+    })
+  }
+
+  async function go() {
+    // 绿灯10s，黄灯2s，红灯5s
+    light('green')
+    await wait(10000)
+    light('yellow')
+    await wait(2000)
+    light('red')
+    await wait(5000)
+    go()
+  }
+
+  go()
+</script>
+</html>
