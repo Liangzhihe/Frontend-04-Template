@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>map editer</title>
+  <style>
+    #container {
+      display: flex;
+      flex-wrap: wrap;
+      margin: 20px;
+      width: 700px;
+    }
+
+    .cell {
+      width: 6px;
+      height: 6px;
+      border-right: 1px solid #fff;
+      border-bottom: 1px solid #fff;
+      background: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  <button onclick="handleClick()">保存</button>
+  <button onclick="clearMap()">清空</button>
+
+  <script>
+
+    class Sorted {
+      constructor(data, compare) {
+        this.data = data.slice()
+        this.compare = compare || ((a, b) => a - b)
+      }
+
+      take() {
+        if (!this.data.length) return
+        let min = this.data[0]
+        let minIndex = 0
+        for (let i = 1; i < this.data.length; i += 1) {
+          if (this.compare(this.data[i], min) < 0) {
+            min = this.data[i]
+            minIndex = i
+          }
+        }
+        this.data[minIndex] = this.data[this.data.length - 1]
+        this.data.pop()
+        return min
+      }
+
+      give(v) {
+        this.data.push(v)
+      }
+
+      get length() {
+        return this.data.length
+      }
+    }
+
+
+    let map = localStorage['map'] ? JSON.parse(localStorage['map']) : Array(10000).fill(0)
+
+    let mousedown = false
+    let clear = false
+    document.addEventListener('mousedown', e => {
+      mousedown = true
+      clear = (e.which === 3) // 鼠标右键
+    })
+
+    document.addEventListener('mouseup', () => mousedown = false)
+    document.addEventListener('contextmenu', e => e.preventDefault())
+
+    let container = document.getElementById('container')
+    for (let y = 0; y < 100; y += 1) {
+      for (let x = 0; x < 100; x += 1) {
+        const cell = document.createElement('div')
+        cell.classList.add('cell')
+        if (map[y * 100 + x] === 1) {
+          cell.style.background = '#000';
+        }
+        cell.addEventListener('mousemove', () => {
+          if (mousedown) {
+            if (clear) {
+              cell.style.background = ''
+              map[y * 100 + x] = 0
+            } else {
+              cell.style.background = '#000'
+              map[y * 100 + x] = 1
+            }
+          }
+        })
+        container.appendChild(cell)
+      }
+    }
+
+    // 保存绘制图案
+    function handleClick() {
+      localStorage['map'] = JSON.stringify(map)
+    }
+
+    // 清空绘制的图案
+    function clearMap() {
+      localStorage['map'] = JSON.stringify(Array(10000).fill(0))
+      window.location.reload()
+    }
+
+    function wait(t) {
+      return new Promise((resolve, reject) => {
+        setTimeout(resolve, t)
+      })
+    }
+
+    const cells = document.querySelectorAll('.cell')
+
+    async function findPath(map, start, end) {
+      let table = Object.create(map)
+      const queue = new Sorted([start], (a, b) => distance(a) - distance(b))
+      const t = 1
+
+      async function insert(x, y, pre) {
+        if (x < 0 || x >= 100 || y < 0 || y >= 100) {
+          return
+        }
+        if (table[y * 100 + x]) {
+          return
+        }
+        await wait(t)
+
+        // 使用动画展示过程
+        cells[y * 100 + x].style.background = '#09f'
+        table[y * 100 + x] = pre
+        queue.give([x, y])
+      }
+
+      function distance(p) {
+        return (p[0] - end[0]) ** 2 + (p[1] - end[1]) ** 2
+      }
+
+      
+      while(queue.length) {
+        let [x, y] = queue.take()
+        if ( x === end[0] && y === end[1]) {
+          console.log('就是这个!')
+          cells[y * 100 + x].style.background = '#0f9'
+          let path = []
+          while (x !== start[0] || y !== start[1]) {
+            path.push(table[y * 100 + x]);
+            [x, y] = table[y * 100 + x]
+            await wait(t * 100)
+            cells[y * 100 + x].style.background = '#f90'
+          }
+          return path
+        }
+
+        await insert(x - 1, y, [x, y]) // 左
+        await insert(x, y - 1, [x, y]) // 上
+        await insert(x + 1, y, [x, y]) // 右
+        await insert(x, y + 1, [x, y]) // 下
+
+        await insert(x - 1, y - 1, [x, y]) // 左上
+        await insert(x + 1, y - 1, [x, y]) // 右上
+        await insert(x - 1, y + 1, [x, y]) // 左下
+        await insert(x + 1, y + 1, [x, y]) // 右下
+      }
+      return null
+    }
+
+    // run next line in the browser console terminal
+    // findPath(map, [1, 1], [50, 50])
+    cells[50 * 100 + 50].style.background = '#f09'
+  </script>
+</body>
+</html>
