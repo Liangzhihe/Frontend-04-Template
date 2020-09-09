@@ -8,17 +8,74 @@
 <body>
 <script>
 
+// 模式匹配，返回值是pattern匹配到的位置，若未匹配，则返回-1
+// 先来个暴力算法
+function bf(source, pattern) {
+  for (let i = 0; i < source.length; i += 1) {
+    for (let j = 0; j < pattern.length; j += 1) {
+      if (source[i + j] === pattern[j]) {
+        if (j === pattern.length - 1) return i
+      } else {
+        break
+      }
+    }
+  }
+  return -1
+}
 
+function getTable(pattern) {
+  let table = new Array(pattern.length).fill(0)
+  let i = 1
+  let j = 0
+  while (i < pattern.length) {
+    if (pattern[i] === pattern[j]) {
+      ++i
+      ++j
+      table[i] = j
+    } else {
+      if (j > 0) {
+        j = table[j]
+      } else {
+        ++i
+      }
+    }
+  }
+  return table
+}
 
+// kmp
+function kmp(source, pattern) {
+  // 首先，计算table数组
+  let table = getTable(pattern)
+  let i = 0
+  let j = 0
+  while (i < source.length) {
+    if (source[i] === pattern[j]) {
+      ++i
+      ++j
+    } else {
+      if (j > 0) {
+        j = table[j]
+      } else {
+        ++i
+      }
+    }
+    if (j === pattern.length) {
+      return i - j
+    }
+  }
+  return -1
+}
 
-
-
-
-
-
-
-
-
+const s  = '21231212121231231231231232234121212312312312331212123'
+const p1 = '12123123123123'
+        // '00012012012012'
+const p2 = '12123123123123a'
+console.log(bf(s, p1))  // 8
+console.log(bf(s, p2))  // -1
+console.log(kmp(s, p1)) // 8
+console.log(kmp(s, p2)) // -1
+console.log(kmp('abc', 'abc')) // 0
 
 
 </script>
