@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>wildcard</title>
+</head>
+<body>
+<script>
+
+function find(source, pattern) {
+  let starCount = 0
+  for (let i = 0; i < pattern.length; i += 1) {
+    if (pattern[i] === '*') starCount += 1
+  }
+  if (starCount === 0) {
+    if (source.length !== pattern.length) return false
+    for (let i = 0; i < pattern.length; i += 1) {
+      if (pattern[i] !== source[i] && pattern[i] !== '?') return false
+    }
+    return true
+  }
+
+  let i = 0
+  let lastIndex = 0
+  for (i = 0; pattern[i] !== '*'; i += 1) {
+    if (pattern[i] !== source[i] && pattern[i] !== '?') return false
+  }
+  lastIndex = i
+
+  for (let p = 0; p < starCount - 1; p += 1) {
+    i += 1
+    let subPattern = ''
+    while (pattern[i] !== '*') {
+      subPattern += pattern[i]
+      i += 1
+    }
+
+    const reg = new RegExp(subPattern.replace(/\?/g, '[\\s\\S]'), 'g')
+    reg.lastIndex = lastIndex
+
+    const c = reg.exec(source)
+    if (!c) return false
+    lastIndex = reg.lastIndex
+  }
+
+  const arr = pattern.split('*')
+  const lastLen = arr[arr.length - 1].length
+
+  if (source.length - lastIndex < lastLen) return false
+
+  for (let j = 0; j <= source.length - lastIndex && pattern[pattern.length - j] !== '*'; j += 1) {
+    if (pattern[pattern.length - j] !== source[source.length - j]
+      && pattern[pattern.length - j] !== '?'
+    ) return false    
+  }
+  return true
+}
+
+console.log(find('abefcdgiescdfimde', 'ab*cd?i*de')) // true
+console.log(find('adceb', '*a*b'))                   // true
+console.log(find('acdcb', 'a*c?b'))                  // false
+console.log(find('aaaa', '***a'))                    // true
+console.log(find('aa', 'a'))                         // false
+console.log(find('mississippi', 'm??*ss*?i*pi'))     // false
+console.log(find('zacabz', '*a?b*'))                 // false
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
